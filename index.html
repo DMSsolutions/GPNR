@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPNR - Gestion des Pôles</title>
+    <!-- Content Security Policy for basic security -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com;">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            DEFAULT: '#D4AF37',
+                            light: '#F4E6C1',
+                            dark: '#A6892C',
+                        },
+                        cream: '#F9F6F1',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'marble': "url('fa171f2c-81da-4d89-a732-1dd7811ac242.png')",
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #A6892C 100%);
+        }
+        .text-gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #A6892C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .section-padding {
+            padding: 5rem 1rem;
+        }
+        @media (min-width: 768px) {
+            .section-padding {
+                padding: 8rem 2rem;
+            }
+        }
+        .hover-gold:hover {
+            color: #D4AF37;
+            transition: color 0.3s ease;
+        }
+        .marble-overlay {
+            position: relative;
+        }
+        .marble-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('fa171f2c-81da-4d89-a732-1dd7811ac242.png');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .marble-overlay > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Fluid / Blob Effect */
+        .fluid-bg {
+            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            position: relative;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(255, 255, 255, 0.4) 100%);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            filter: blur(40px);
+            animation: blob-float 15s infinite ease-in-out;
+            z-index: 0;
+        }
+        @keyframes blob-float {
+            0%, 100% { transform: translate(0, 0) scale(1); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            33% { transform: translate(30px, -50px) scale(1.1); border-radius: 60% 40% 30% 70% / 50% 30% 70% 50%; }
+            66% { transform: translate(-20px, 20px) scale(0.9); border-radius: 30% 70% 60% 40% / 70% 60% 30% 40%; }
+        }
+        .logo-container {
+            position: relative;
+            z-index: 10;
+        }
+        .logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+            filter: blur(20px);
+            z-index: -1;
+            animation: pulse-gold 4s infinite alternate;
+        }
+        @keyframes pulse-gold {
+            0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans selection:bg-gold-light selection:text-gold-dark">
+
+    <!-- Header / Navigation -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <img src="img_7448_720.jpg" alt="GPNR Logo" class="h-16 w-auto mr-4">
+                    <span class="text-2xl font-serif font-bold text-gold tracking-wider">GPNR</span>
+                </div>
+                <div class="hidden md:flex space-x-10 items-center">
+                    <a href="#planning" class="text-sm font-medium hover-gold">Planning</a>
+                    <a href="#nettoyage" class="text-sm font-medium hover-gold">Nettoyage</a>
+                    <a href="#reservation" class="text-sm font-medium hover-gold">Réservation</a>
+                    <a href="#outils" class="text-sm font-medium hover-gold">Outils</a>
+                    <a href="#contact" class="px-5 py-2.5 rounded-full gold-gradient text-white text-sm font-semibold shadow-lg hover:opacity-90 transition-all">Nous Contacter</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-500 hover:text-gold">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu, show/hide based on menu state -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-4">
+            <a href="#planning" class="block text-base font-medium hover-gold">Planning</a>
+            <a href="#nettoyage" class="block text-base font-medium hover-gold">Nettoyage</a>
+            <a href="#reservation" class="block text-base font-medium hover-gold">Réservation</a>
+            <a href="#outils" class="block text-base font-medium hover-gold">Outils</a>
+            <a href="#contact" class="block w-full text-center px-5 py-2.5 rounded-full gold-gradient text-white text-sm font-semibold">Nous Contacter</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-cream marble-overlay">
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-gold opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-gold opacity-5 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-3xl mx-auto">
+                <h1 class="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-6 leading-tight">
+                    L'Excellence au Service de vos <span class="text-gold-gradient">Pôles d'Activités</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed">
+                    GPNR accompagne l'organisation et le développement de vos services avec rigueur, élégance et efficacité.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#planning" class="px-8 py-4 rounded-full gold-gradient text-white font-bold shadow-xl hover:scale-105 transition-transform">Découvrir nos services</a>
+                    <a href="#reservation" class="px-8 py-4 rounded-full border-2 border-gold text-gold font-bold hover:bg-gold hover:text-white transition-all">Réserver maintenant</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 1. Gestion de Planning -->
+    <section id="planning" class="section-padding bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-16">
+                <div class="md:w-1/2">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-gold-light/20 text-gold-dark text-sm font-semibold mb-6">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>PÔLE 01</span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-serif font-bold mb-6">Gestion de Planning</h2>
+                    <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+                        Le cœur battant de votre organisation. Nous assurons une planification millimétrée pour garantir le succès de chaque intervention.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="p-2 rounded-lg bg-gold-light/30 text-gold">
+                                <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Planification Intelligente</h4>
+                                <p class="text-gray-600">Interventions de nettoyage, accueil et maintenance optimisées.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="p-2 rounded-lg bg-gold-light/30 text-gold">
+                                <i data-lucide="activity" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Suivi en Temps Réel</h4>
+                                <p class="text-gray-600">Monitoring constant des logements et locaux pour zéro retard.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="p-2 rounded-lg bg-gold-light/30 text-gold">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Organisation des Équipes</h4>
+                                <p class="text-gray-600">Calendriers partagés (Google Agenda, Notion) et fiches clients.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 relative">
+                    <div class="absolute -inset-4 bg-gold opacity-10 rounded-3xl blur-2xl"></div>
+                    <img src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&q=80&w=800" alt="Planning Management" class="relative rounded-2xl shadow-2xl border border-gold/10">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Nettoyage -->
+    <section id="nettoyage" class="section-padding bg-cream marble-overlay">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row-reverse items-center gap-16">
+                <div class="md:w-1/2">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-gold-light/20 text-gold-dark text-sm font-semibold mb-6">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        <span>PÔLE 02</span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-serif font-bold mb-6">Nettoyage d'Excellence</h2>
+                    <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+                        Un service essentiel où la qualité n'est pas négociable. Nous garantissons une hygiène irréprochable pour fidéliser vos clients.
+                    </p>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-gold"></i>
+                            <span>Checklist de nettoyage standard rigoureuse</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="award" class="w-5 h-5 text-gold"></i>
+                            <span>Contrôle qualité systématique après chaque prestation</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="star" class="w-5 h-5 text-gold"></i>
+                            <span>Services Premium : vitres, désinfection, linge</span>
+                        </li>
+                    </ul>
+                    <div class="p-6 bg-white rounded-xl shadow-sm border border-gold/10">
+                        <p class="italic text-gray-600 font-medium">"La propreté est la première image que vos clients gardent de vous. Nous la rendons impeccable."</p>
+                    </div>
+                </div>
+                <div class="md:w-1/2 relative">
+                    <div class="absolute -inset-4 bg-gold opacity-10 rounded-3xl blur-2xl"></div>
+                    <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800" alt="Nettoyage de luxe" class="relative rounded-2xl shadow-2xl border border-gold/10 object-cover aspect-video">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Réservation -->
+    <section id="reservation" class="section-padding bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-gold-light/20 text-gold-dark text-sm font-semibold mb-6">
+                    <i data-lucide="mouse-pointer-click" class="w-4 h-4"></i>
+                    <span>PÔLE 03</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold mb-6">Réservation & Automatisation</h2>
+                <p class="text-gray-600 text-lg leading-relaxed">
+                    Simplifiez l'expérience de vos clients tout en réduisant vos erreurs de communication grâce à nos processus automatisés.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-8 rounded-2xl bg-cream border border-gold/10 hover:shadow-xl transition-shadow group">
+                    <div class="w-14 h-14 rounded-full gold-gradient flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="globe" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Gestion Multi-Plateforme</h3>
+                    <p class="text-gray-600">Centralisation des réservations via notre site ou vos plateformes habituelles.</p>
+                </div>
+                <div class="p-8 rounded-2xl bg-cream border border-gold/10 hover:shadow-xl transition-shadow group">
+                    <div class="w-14 h-14 rounded-full gold-gradient flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="message-square" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Confirmation Automatique</h3>
+                    <p class="text-gray-600">Notifications instantanées par Mail et SMS pour vos clients et équipes.</p>
+                </div>
+                <div class="p-8 rounded-2xl bg-cream border border-gold/10 hover:shadow-xl transition-shadow group">
+                    <div class="w-14 h-14 rounded-full gold-gradient flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="refresh-cw" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Sync Planning Directe</h3>
+                    <p class="text-gray-600">Chaque réservation met à jour automatiquement le planning des équipes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Outils Collaboratifs -->
+    <section id="outils" class="section-padding bg-cream marble-overlay">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-gold-light/20 text-gold-dark text-sm font-semibold mb-6">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                    <span>NOS TECHNOLOGIES</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold mb-6">Outils Collaboratifs</h2>
+                <p class="text-gray-600 text-lg leading-relaxed">
+                    Nous utilisons les meilleures solutions du marché pour garantir une synchronisation parfaite et une transparence totale avec nos clients.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Excel -->
+                <div class="bg-white p-10 rounded-3xl shadow-xl border border-gold/10 hover:shadow-2xl transition-all group text-center">
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-green-50 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <i data-lucide="file-spreadsheet" class="w-10 h-10 text-green-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">Microsoft Excel</h3>
+                    <p class="text-gray-600 mb-6">Analyse de données, rapports financiers et suivi détaillé des indicateurs de performance.</p>
+                    <div class="inline-flex items-center text-gold font-semibold text-sm">
+                        <span>Précision & Analyse</span>
+                    </div>
+                </div>
+
+                <!-- MyCalendar -->
+                <div class="bg-white p-10 rounded-3xl shadow-xl border border-gold/10 hover:shadow-2xl transition-all group text-center">
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <i data-lucide="calendar-days" class="w-10 h-10 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">MyCalendar</h3>
+                    <p class="text-gray-600 mb-6">Synchronisation en temps réel des interventions et gestion optimisée des disponibilités.</p>
+                    <div class="inline-flex items-center text-gold font-semibold text-sm">
+                        <span>Organisation Fluide</span>
+                    </div>
+                </div>
+
+                <!-- Airbnb -->
+                <div class="bg-white p-10 rounded-3xl shadow-xl border border-gold/10 hover:shadow-2xl transition-all group text-center">
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-rose-50 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <i data-lucide="home" class="w-10 h-10 text-rose-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">Airbnb</h3>
+                    <p class="text-gray-600 mb-6">Intégration directe pour une gestion simplifiée des réservations et des calendriers locatifs.</p>
+                    <div class="inline-flex items-center text-gold font-semibold text-sm">
+                        <span>Connexion Directe</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact / Booking Form -->
+    <section id="contact" class="section-padding bg-gray-50 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gold/10">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/3 gold-gradient p-10 text-white">
+                        <h3 class="text-2xl font-serif font-bold mb-6">Contactez GPNR</h3>
+                        <p class="mb-8 opacity-90">Prêt à optimiser votre gestion ? Notre équipe vous répond sous 24h.</p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="mail" class="w-5 h-5"></i>
+                                <span>contact@gpnr.fr</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                                <span>+33 1 23 45 67 89</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-2/3 p-10">
+                        <form id="contact-form" class="space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nom complet</label>
+                                    <input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                    <input type="email" id="email" name="email" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Pôle concerné</label>
+                                <select id="pole" name="pole" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all bg-white">
+                                    <option value="planning">Gestion de Planning</option>
+                                    <option value="nettoyage">Nettoyage</option>
+                                    <option value="reservation">Réservation</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Message</label>
+                                <textarea id="message" name="message" rows="4" required class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-4 rounded-xl gold-gradient text-white font-bold shadow-lg hover:opacity-90 transition-all">Envoyer la demande</button>
+                        </form>
+                        <div id="form-success" class="hidden mt-6 p-4 bg-green-50 text-green-700 rounded-lg text-center font-medium">
+                            Merci ! Votre message a été envoyé avec succès.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fluid Logo Section -->
+    <section class="fluid-bg py-24 flex items-center justify-center overflow-hidden">
+        <div class="blob w-64 h-64 top-0 left-1/4"></div>
+        <div class="blob w-96 h-96 bottom-0 right-1/4" style="animation-delay: -5s;"></div>
+        <div class="blob w-72 h-72 top-1/2 left-1/2" style="animation-delay: -10s;"></div>
+        
+        <div class="logo-container text-center">
+            <div class="relative inline-block">
+                <div class="logo-glow"></div>
+                <img src="img_7448_720.jpg" alt="GPNR Signature" class="h-48 md:h-64 w-auto drop-shadow-2xl hover:scale-105 transition-transform duration-700">
+            </div>
+            <div class="mt-8">
+                <h3 class="text-3xl font-serif font-bold text-gold-gradient tracking-widest uppercase">L'Excellence GPNR</h3>
+                <div class="w-24 h-1 gold-gradient mx-auto mt-4 rounded-full"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white py-12 border-t border-gray-100 marble-overlay">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="flex flex-col items-center mb-8">
+                <img src="img_7448_720.jpg" alt="GPNR Logo" class="h-24 w-auto mb-6 opacity-90 hover:opacity-100 transition-opacity">
+                <span class="text-3xl font-serif font-bold text-gold tracking-widest block">GPNR</span>
+            </div>
+            <p class="text-gray-500 text-sm">© 2026 GPNR - Tous droits réservés. Gestion de Pôles de GPNR.</p>
+            <div class="mt-6 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gold transition-colors">Mentions légales</a>
+                <a href="#" class="text-gray-400 hover:text-gold transition-colors">Confidentialité</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Form handling with basic security/sanitization
+        const contactForm = document.getElementById('contact-form');
+        const formSuccess = document.getElementById('form-success');
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Simple sanitization
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const pole = document.getElementById('pole').value;
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !email || !message) {
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+
+            // Simulate form submission
+            console.log('Form submitted:', { name, email, pole, message });
+            
+            contactForm.classList.add('opacity-50', 'pointer-events-none');
+            setTimeout(() => {
+                contactForm.reset();
+                contactForm.classList.add('hidden');
+                formSuccess.classList.remove('hidden');
+            }, 1000);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
