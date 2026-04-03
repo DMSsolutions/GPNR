@@ -133,10 +133,17 @@
             opacity: 0;
             transform: translateY(18px) scale(0.985);
             transition: opacity 250ms ease, transform 250ms ease;
+            max-height: calc(100vh - 2rem);
+            display: flex;
+            flex-direction: column;
         }
         .tarifs-modal.is-open .tarifs-panel {
             opacity: 1;
             transform: translateY(0) scale(1);
+        }
+        .tarifs-body {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .brand-logo {
             border-radius: 14px;
@@ -514,7 +521,7 @@
                 </button>
             </div>
 
-            <div class="px-6 py-6 md:px-10 md:py-10 bg-cream marble-overlay">
+            <div class="tarifs-body flex-1 px-6 py-6 md:px-10 md:py-10 bg-cream marble-overlay">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white rounded-2xl border border-gold/10 shadow-sm overflow-hidden">
                         <div class="px-6 py-5 border-b border-gray-100">
